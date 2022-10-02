@@ -10,6 +10,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Hello, world"
-            android:textSize="24sp"/>
+            android:textSize="24sp"
+            android:background="@drawable/info_text"
+            android:paddingStart="10dp"/>
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

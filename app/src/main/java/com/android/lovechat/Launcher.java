@@ -8,8 +8,10 @@ import androidx.annotation.Nullable;
 public class Launcher extends Activity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+        setTheme(R.style.Theme_LoveChat);
 
         setContentView(R.layout.main);
+
+        super.onCreate(savedInstanceState);
     }
 }
