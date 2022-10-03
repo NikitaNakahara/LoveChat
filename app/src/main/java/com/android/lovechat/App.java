@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -62,11 +63,41 @@ public class App extends Activity {
 
                     if (passwordCharIndex[0] == 4) {
                         if (new String(password).equals(UserData.password)) {
-                            Toast.makeText(this, new String(password), Toast.LENGTH_SHORT).show();
+                            startChat();
+                        } else {
+                            passwordCharIndex[0] = 0;
+                            for (View point : points) {
+                                point.setBackgroundResource(R.drawable.password_point);
+                            }
                         }
                     }
                 }
             });
         }
+    }
+
+    private void startChat() {
+        setContentView(R.layout.chat);
+
+        findViewById(R.id.send_message).setOnClickListener(v -> {
+            EditText msgInput = findViewById(R.id.message_input);
+            Chat.addMessage(
+                    this,
+                    Chat.SENT_MESSAGE,
+                    findViewById(R.id.chat_scroll),
+                    findViewById(R.id.chat_layout),
+                    msgInput.getText().toString()
+            );
+
+            Chat.addMessage(
+                    this,
+                    Chat.GET_MESSAGE,
+                    findViewById(R.id.chat_scroll),
+                    findViewById(R.id.chat_layout),
+                    msgInput.getText().toString()
+            );
+
+            msgInput.setText("");
+        });
     }
 }

@@ -26,7 +26,6 @@ public class Launcher extends Activity {
         String config = "";
         try {
             config = readConfigFile();
-            parseConfig(config);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -34,6 +33,7 @@ public class Launcher extends Activity {
         if (config == null) {
             startActivity(new Intent(this, SignIn.class));
         } else {
+            parseConfig(config);
             startActivity(new Intent(this, App.class));
         }
 

@@ -1,0 +1,20 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <selector android:enterFadeDuration="300" android:exitFadeDuration="300">
+            <item android:state_pressed="true">
+                <shape android:shape="rectangle">
+                    <corners android:radius="25dp"/>
+                    <solid android:color="@color/gray"/>
+                </shape>
+            </item>
+            <item android:state_pressed="false">
+                <shape android:shape="rectangle">
+                    <corners android:radius="25dp"/>
+                </shape>
+            </item>
+        </selector>
+    </item>
+    <item android:top="9dp" android:bottom="9dp" android:start="9dp" android:end="9dp">
+        <bitmap android:src="@drawable/send_message_img"/>
+    </item>
+</layer-list>

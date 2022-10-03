@@ -3,4 +3,5 @@
     <color name="main_ui_color">#FF8DA0FE</color>
     <color name="window_bg">#FF000000</color>
     <color name="contrast_color">#FFFFFFFF</color>
+    <color name="gray">#FF313233</color>
 </resources>
