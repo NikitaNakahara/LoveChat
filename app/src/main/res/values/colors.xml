@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="main_ui_color">#FF03CAB5</color>
+    <color name="main_ui_color">#FF7D90DE</color>
     <color name="window_bg">#FFFFFFFF</color>
+    <color name="contrast_color">#FF121212</color>
 </resources>
