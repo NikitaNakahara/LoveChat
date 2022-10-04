@@ -10,12 +10,18 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class App extends Activity {
+    private ChatDatabase db;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         setTheme(R.style.Theme_LoveChat);
+
+        db = new ChatDatabase(this, "", null, 1);
 
         checkPassword();
 
@@ -79,6 +85,9 @@ public class App extends Activity {
     private void startChat() {
         setContentView(R.layout.chat);
 
+        Map<String, String> chatMap = db.getMessages();
+
+
         findViewById(R.id.send_message).setOnClickListener(v -> {
             EditText msgInput = findViewById(R.id.message_input);
             Chat.addMessage(
@@ -88,6 +97,8 @@ public class App extends Activity {
                     findViewById(R.id.chat_layout),
                     msgInput.getText().toString()
             );
+
+            db.addMessage(Chat.SENT_MESSAGE, msgInput.getText().toString());
 
 
             /*
