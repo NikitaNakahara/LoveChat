@@ -16,10 +16,10 @@ public class ChatDatabase extends SQLiteOpenHelper {
     private final String TABLE_NAME = "MESSAGES";
     private final String MSG_TEXT = "TEXT";
     private final String MSG_TYPE = "TYPE";
-    private final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 1;
 
-    public ChatDatabase(@Nullable Context context, @Nullable String name, @Nullable SQLiteDatabase.CursorFactory factory, int version) {
-        super(context, name, factory, version);
+    public ChatDatabase(@Nullable Context context) {
+        super(context, "database.db", null, DATABASE_VERSION);
     }
 
     @Override
@@ -47,29 +47,9 @@ public class ChatDatabase extends SQLiteOpenHelper {
         db.insert(TABLE_NAME, null, map);
     }
 
-    public Map<String, String> getMessages() {
-        SQLiteDatabase db = getReadableDatabase();
-
-        Cursor cursor = db.query(TABLE_NAME,
-                null,
-                null,
-                null,
-                null,
-                null,
+    public Cursor getCursor() {
+        return getReadableDatabase().rawQuery(
+                "SELECT " + MSG_TEXT + ", " + MSG_TYPE + " FROM " + TABLE_NAME,
                 null);
-
-        Map<String, String> map = new HashMap<>();
-        if (cursor.moveToFirst()) {
-            do {
-                int textIndex = cursor.getColumnIndex(MSG_TEXT);
-                map.put("text", cursor.getString(textIndex));
-                int typeIndex = cursor.getColumnIndex(MSG_TYPE);
-                map.put("type", cursor.getString(typeIndex));
-            } while (cursor.moveToNext());
-        }
-
-        cursor.close();
-
-        return map;
     }
 }

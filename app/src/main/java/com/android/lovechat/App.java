@@ -1,6 +1,9 @@
 package com.android.lovechat;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.database.Cursor;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -21,7 +24,7 @@ public class App extends Activity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         setTheme(R.style.Theme_LoveChat);
 
-        db = new ChatDatabase(this, "", null, 1);
+        db = new ChatDatabase(this);
 
         checkPassword();
 
@@ -82,11 +85,16 @@ public class App extends Activity {
         }
     }
 
+    @SuppressLint("StaticFieldLeak")
     private void startChat() {
         setContentView(R.layout.chat);
 
-        Map<String, String> chatMap = db.getMessages();
-
+        Chat.loadChat(
+                this,
+                findViewById(R.id.chat_layout),
+                findViewById(R.id.chat_scroll),
+                db
+        );
 
         findViewById(R.id.send_message).setOnClickListener(v -> {
             EditText msgInput = findViewById(R.id.message_input);
@@ -98,17 +106,7 @@ public class App extends Activity {
                     msgInput.getText().toString()
             );
 
-            db.addMessage(Chat.SENT_MESSAGE, msgInput.getText().toString());
-
-
-            /*
-            Chat.addMessage(
-                    this,
-                    Chat.GET_MESSAGE,
-                    findViewById(R.id.chat_scroll),
-                    findViewById(R.id.chat_layout),
-                    msgInput.getText().toString()
-            );*/
+            db.addMessage(msgInput.getText().toString(), Chat.SENT_MESSAGE);
 
             msgInput.setText("");
         });
