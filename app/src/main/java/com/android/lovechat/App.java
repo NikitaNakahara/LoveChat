@@ -89,13 +89,15 @@ public class App extends Activity {
                     msgInput.getText().toString()
             );
 
+
+            /*
             Chat.addMessage(
                     this,
                     Chat.GET_MESSAGE,
                     findViewById(R.id.chat_scroll),
                     findViewById(R.id.chat_layout),
                     msgInput.getText().toString()
-            );
+            );*/
 
             msgInput.setText("");
         });
