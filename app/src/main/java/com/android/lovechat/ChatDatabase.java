@@ -17,9 +17,14 @@ public class ChatDatabase extends SQLiteOpenHelper {
     private final String MSG_TEXT = "TEXT";
     private final String MSG_TYPE = "TYPE";
     private static final int DATABASE_VERSION = 1;
+    private SQLiteDatabase writableDb = null;
 
     public ChatDatabase(@Nullable Context context) {
         super(context, "database.db", null, DATABASE_VERSION);
+    }
+
+    public void createWritableDb() {
+        writableDb = getWritableDatabase();
     }
 
     @Override
@@ -39,12 +44,11 @@ public class ChatDatabase extends SQLiteOpenHelper {
     }
 
     public void addMessage(String text, String type) {
-        SQLiteDatabase db = getWritableDatabase();
         ContentValues map = new ContentValues();
         map.put(MSG_TEXT, text);
         map.put(MSG_TYPE, type);
 
-        db.insert(TABLE_NAME, null, map);
+        writableDb.insert(TABLE_NAME, null, map);
     }
 
     public Cursor getCursor() {

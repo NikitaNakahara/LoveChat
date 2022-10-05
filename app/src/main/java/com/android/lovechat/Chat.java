@@ -17,17 +17,24 @@ public class Chat {
     public static String GET_MESSAGE = "get";
     public static String SENT_MESSAGE = "sent";
 
+    private static ChatDatabase db = null;
+
     private static String lastMessageType = "none";
     private static LinearLayout lastMsgLayout = null;
     private static TextView lastTextView = null;
+
+    public static void setDatabase(ChatDatabase _db) { db = _db; }
 
     public static void addMessage(
             Context context,
             String type,
             ScrollView scroll,
             LinearLayout layout,
-            String text
+            String text,
+            boolean addToDatabase
     ) {
+
+
         if (lastMessageType.equals("none")) {
             LinearLayout msgLayout = new LinearLayout(context);
             LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
@@ -153,14 +160,17 @@ public class Chat {
             layout.addView(msgLayout);
         }
 
+        if (addToDatabase) {
+            db.addMessage(text, type);
+        }
+
         scroll.post(() -> scroll.fullScroll(ScrollView.FOCUS_DOWN));
     }
 
     public static void loadChat(
             Context context,
             LinearLayout layout,
-            ScrollView scroll,
-            ChatDatabase db
+            ScrollView scroll
     ) {
         Cursor cursor = db.getCursor();
         new AsyncTask<Void, String, Void>() {
@@ -188,7 +198,8 @@ public class Chat {
                         strings[1],
                         scroll,
                         layout,
-                        strings[0]
+                        strings[0],
+                        false
                 );
             }
         }.execute();

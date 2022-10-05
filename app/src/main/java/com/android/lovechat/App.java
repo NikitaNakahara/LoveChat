@@ -2,6 +2,7 @@ package com.android.lovechat;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -25,6 +26,7 @@ public class App extends Activity {
         setTheme(R.style.Theme_LoveChat);
 
         db = new ChatDatabase(this);
+        db.createWritableDb();
 
         checkPassword();
 
@@ -89,12 +91,20 @@ public class App extends Activity {
     private void startChat() {
         setContentView(R.layout.chat);
 
+        Chat.setDatabase(db);
+
         Chat.loadChat(
                 this,
                 findViewById(R.id.chat_layout),
-                findViewById(R.id.chat_scroll),
-                db
+                findViewById(R.id.chat_scroll)
         );
+
+        Network network = new Network();
+        network.setLayout(findViewById(R.id.chat_layout));
+        network.setScroll(findViewById(R.id.chat_scroll));
+        network.setContext(this);
+
+        network.execute();
 
         findViewById(R.id.send_message).setOnClickListener(v -> {
             EditText msgInput = findViewById(R.id.message_input);
@@ -103,10 +113,12 @@ public class App extends Activity {
                     Chat.SENT_MESSAGE,
                     findViewById(R.id.chat_scroll),
                     findViewById(R.id.chat_layout),
-                    msgInput.getText().toString()
+                    msgInput.getText().toString(),
+                    true
             );
 
-            db.addMessage(msgInput.getText().toString(), Chat.SENT_MESSAGE);
+            network.setMessageText(msgInput.getText().toString());
+            network.setMessageIsSent(true);
 
             msgInput.setText("");
         });
