@@ -30,6 +30,8 @@ public class Messenger extends Service {
     private static LinearLayout notifLayout = null;
     private static TextView notifTextView = null;
 
+    private static boolean stopNetwork = false;
+
     private static String messageText = "";
 
     public static void setLayout(LinearLayout _layout) {
@@ -67,6 +69,7 @@ public class Messenger extends Service {
 
     @Override
     public void onDestroy() {
+        stopNetwork = true;
         super.onDestroy();
     }
 
@@ -89,41 +92,42 @@ public class Messenger extends Service {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            try {
-                createConnection();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            createIOStreams();
-
-            new Thread(() -> {
-                while (socket.isConnected()) {
-                    if (!Objects.equals(messageText, "")) {
-                        try {
-                            output.writeUTF(messageText);
-                            output.flush();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-
-                        messageText = "";
-                    }
-                }
-            }).start();
-
-            while (socket.isConnected()) {
+            while (!stopNetwork) {
                 try {
-                    String message = input.readUTF();
-                    publishProgress("msg", message);
+                    socket = null;
+                    createConnection();
                 } catch (IOException e) {
-                    try {
-                        createConnection();
-                    } catch (IOException ex) {
-                        ex.printStackTrace();
-                    }
+                    e.printStackTrace();
+                }
 
-                    createIOStreams();
+                createIOStreams();
+
+                new Thread(() -> {
+                    boolean exception = false;
+                    while (!exception) {
+                        if (!Objects.equals(messageText, "")) {
+                            try {
+                                output.writeUTF(messageText);
+                                output.flush();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                                exception = true;
+                            }
+
+                            messageText = "";
+                        }
+                    }
+                }).start();
+
+                boolean exception = false;
+                while (!exception) {
+                    try {
+                        String message = input.readUTF();
+                        publishProgress("msg", message);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        exception = true;
+                    }
                 }
             }
 
