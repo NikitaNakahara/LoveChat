@@ -99,12 +99,16 @@ public class App extends Activity {
                 findViewById(R.id.chat_scroll)
         );
 
-        Network network = new Network();
-        network.setLayout(findViewById(R.id.chat_layout));
-        network.setScroll(findViewById(R.id.chat_scroll));
-        network.setContext(this);
+        Messenger.setScroll(findViewById(R.id.chat_scroll));
+        Messenger.setLayout(findViewById(R.id.chat_layout));
+        Messenger.setContext(this);
+        Messenger.setInnerNotifData(
+                findViewById(R.id.chat_header),
+                findViewById(R.id.chat_inner_notif_layout),
+                findViewById(R.id.chat_inner_notif_text)
+        );
 
-        network.execute();
+        startService(new Intent(this, Messenger.class));
 
         findViewById(R.id.send_message).setOnClickListener(v -> {
             EditText msgInput = findViewById(R.id.message_input);
@@ -117,8 +121,7 @@ public class App extends Activity {
                     true
             );
 
-            network.setMessageText(msgInput.getText().toString());
-            network.setMessageIsSent(true);
+            Messenger.sendMessage(msgInput.getText().toString());
 
             msgInput.setText("");
         });

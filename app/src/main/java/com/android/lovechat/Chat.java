@@ -205,7 +205,7 @@ public class Chat {
         }.execute();
     }
 
-    private static int dpToPx(int dp, Context context) {
+    public static int dpToPx(int dp, Context context) {
         Resources resources = context.getResources();
 
         return (int) TypedValue.applyDimension(

@@ -8,7 +8,9 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="70dp"
-            android:background="@drawable/header">
+            android:background="@drawable/header"
+            android:id="@+id/chat_header"
+            android:orientation="horizontal">
 
         </LinearLayout>
 
@@ -45,6 +47,27 @@
                 android:layout_height="50dp"
                 android:background="@drawable/send_message_button"
                 android:id="@+id/send_message"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:layout_centerHorizontal="true"
+            android:gravity="center_vertical"
+            android:id="@+id/chat_inner_notif_layout"
+            android:scaleX="0.0"
+            android:layout_marginTop="80dp"
+            android:paddingEnd="7dp">
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:src="@drawable/net_icon"
+                android:layout_marginEnd="3dp"
+                android:id="@+id/chat_inner_notif_img"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/chat_inner_notif_text"/>
         </LinearLayout>
     </RelativeLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
