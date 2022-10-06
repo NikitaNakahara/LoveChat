@@ -11,6 +11,9 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.EOFException;
@@ -19,6 +22,8 @@ import java.net.ConnectException;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 public class Messenger extends Service {
@@ -107,7 +112,10 @@ public class Messenger extends Service {
                     while (!exception) {
                         if (!Objects.equals(messageText, "")) {
                             try {
-                                output.writeUTF(messageText);
+                                Map<String, String> map = new HashMap<String, String>();
+                                map.put("type", "msg");
+                                map.put("text", messageText);
+                                output.writeUTF(createJsonString(map));
                                 output.flush();
                             } catch (IOException e) {
                                 e.printStackTrace();
@@ -123,10 +131,15 @@ public class Messenger extends Service {
                 while (!exception) {
                     try {
                         String message = input.readUTF();
-                        publishProgress("msg", message);
+                        JSONObject json = new JSONObject(message);
+                        if (json.getString("type").equals("msg")) {
+                            publishProgress("msg", json.getString("text"));
+                        }
                     } catch (IOException e) {
                         e.printStackTrace();
                         exception = true;
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
                 }
             }
@@ -170,6 +183,10 @@ public class Messenger extends Service {
                             break;
                     }
             }
+        }
+
+        private String createJsonString(Map<String, String> map) {
+            return new JSONObject(map).toString();
         }
 
         private void createConnection() throws IOException {
