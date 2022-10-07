@@ -165,18 +165,22 @@ public class Messenger extends Service {
                         case "inotif":
                             if (Objects.equals(values[2], "alarm")) {
                                 Notifications.innerNotification(
+                                        context,
                                         notifHeader,
                                         notifLayout,
                                         notifTextView,
                                         values[3],
+                                        Chat.dpToPx(150, context),
                                         Notifications.ALARM
                                 );
                             } else {
                                 Notifications.innerNotification(
+                                        context,
                                         notifHeader,
                                         notifLayout,
                                         notifTextView,
                                         values[3],
+                                        Chat.dpToPx(130, context),
                                         Notifications.CONFIRM
                                 );
                             }
