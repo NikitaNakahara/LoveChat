@@ -27,12 +27,32 @@
                 android:textSize="30sp"/>
         </LinearLayout>
 
-        <include layout="@layout/new_password"
-            android:layout_width="wrap_content"
+        <ViewFlipper
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_alignParentBottom="true"
-            android:layout_marginBottom="100dp"
-            android:id="@+id/new_password_layout"/>
+            android:inAnimation="@anim/next_in"
+            android:outAnimation="@anim/next_out"
+            android:id="@+id/sign_in_flipper">
+
+            <include layout="@layout/new_password"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="100dp"/>
+
+            <include layout="@layout/get_id"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginBottom="100dp"/>
+
+            <include layout="@layout/create_users_chain"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginBottom="100dp"/>
+        </ViewFlipper>
     </RelativeLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

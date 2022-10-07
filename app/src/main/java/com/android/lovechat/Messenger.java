@@ -114,6 +114,7 @@ public class Messenger extends Service {
                             try {
                                 Map<String, String> map = new HashMap<String, String>();
                                 map.put("type", "msg");
+                                map.put("id", UserData.interlocutorId);
                                 map.put("text", messageText);
                                 output.writeUTF(createJsonString(map));
                                 output.flush();

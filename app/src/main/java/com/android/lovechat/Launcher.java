@@ -64,6 +64,8 @@ public class Launcher extends Activity {
         try {
             JSONObject confJson = new JSONObject(config);
             UserData.password = confJson.getString("password");
+            UserData.userId = confJson.getString("id");
+            UserData.interlocutorId = confJson.getString("interlocutorId");
         } catch (JSONException e) {
             e.printStackTrace();
         }
