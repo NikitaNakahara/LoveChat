@@ -107,12 +107,23 @@ public class Messenger extends Service {
 
                 createIOStreams();
 
+                Map<String, String> onlineRequestMap = new HashMap<>();
+                onlineRequestMap.put("type", "sys");
+                onlineRequestMap.put("text", "online");
+                onlineRequestMap.put("id", UserData.userId);
+
+                try {
+                    output.writeUTF(new JSONObject(onlineRequestMap).toString());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
                 new Thread(() -> {
                     boolean exception = false;
                     while (!exception) {
                         if (!Objects.equals(messageText, "")) {
                             try {
-                                Map<String, String> map = new HashMap<String, String>();
+                                Map<String, String> map = new HashMap<>();
                                 map.put("type", "msg");
                                 map.put("id", UserData.interlocutorId);
                                 map.put("text", messageText);

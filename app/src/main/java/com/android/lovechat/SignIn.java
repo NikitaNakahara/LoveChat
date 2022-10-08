@@ -123,7 +123,7 @@ public class SignIn extends Activity {
 
                 try {
                     assert input != null;
-                    UserData.userId = new JSONObject(input.readUTF()).getString("text");
+                    UserData.userId = new JSONObject(input.readUTF()).getString("id");
                 } catch (JSONException | IOException e) {
                     e.printStackTrace();
                 }
