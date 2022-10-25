@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.IBinder;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
@@ -31,7 +32,7 @@ public class Messenger extends Service {
     private static ScrollView scroll = null;
     private static Context context = null;
 
-    private static LinearLayout notifHeader = null;
+    private static RelativeLayout notifHeader = null;
     private static LinearLayout notifLayout = null;
     private static TextView notifTextView = null;
 
@@ -49,7 +50,7 @@ public class Messenger extends Service {
         context = _context;
     }
     public static void setInnerNotifData(
-            LinearLayout header,
+            RelativeLayout header,
             LinearLayout layout,
             TextView textView
     ) {
@@ -126,7 +127,7 @@ public class Messenger extends Service {
                                 Map<String, String> map = new HashMap<>();
                                 map.put("type", "msg");
                                 map.put("id", UserData.interlocutorId);
-                                map.put("text", messageText);
+                                map.put("text", Crypt.encryptString(messageText));
                                 output.writeUTF(createJsonString(map));
                                 output.flush();
                             } catch (IOException e) {
@@ -145,7 +146,7 @@ public class Messenger extends Service {
                         String message = input.readUTF();
                         JSONObject json = new JSONObject(message);
                         if (json.getString("type").equals("msg")) {
-                            publishProgress("msg", json.getString("text"));
+                            publishProgress("msg", Crypt.decryptString(json.getString("text")));
                         }
                     } catch (IOException e) {
                         e.printStackTrace();

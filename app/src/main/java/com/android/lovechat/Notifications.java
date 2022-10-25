@@ -14,7 +14,7 @@ public class Notifications {
     public static int CONFIRM = 2;
     public static void innerNotification(
             Context context,
-            LinearLayout header,
+            RelativeLayout header,
             LinearLayout layout,
             TextView textView,
             String text,

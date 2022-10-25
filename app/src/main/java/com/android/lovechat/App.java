@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+import android.widget.ViewFlipper;
 
 import androidx.annotation.Nullable;
 
@@ -28,14 +29,14 @@ public class App extends Activity {
         db = new ChatDatabase(this);
         db.createWritableDb();
 
+        setContentView(R.layout.main);
+
         checkPassword();
 
         super.onCreate(savedInstanceState);
     }
 
     private void checkPassword() {
-        setContentView(R.layout.input_password);
-
         Button[] buttons = new Button[] {
                 findViewById(R.id.pwd_btn_0),
                 findViewById(R.id.pwd_btn_1),
@@ -74,7 +75,16 @@ public class App extends Activity {
 
                     if (passwordCharIndex[0] == 4) {
                         if (new String(password).equals(UserData.password)) {
+                            ViewFlipper flipper = findViewById(R.id.main_flipper);
+                            flipper.setInAnimation(this, R.anim.next_in);
+                            flipper.setOutAnimation(this, R.anim.next_out);
+                            flipper.showNext();
                             startChat();
+
+                            passwordCharIndex[0] = 0;
+                            for (View point : points) {
+                                point.setBackgroundResource(R.drawable.password_point);
+                            }
                         } else {
                             passwordCharIndex[0] = 0;
                             for (View point : points) {
@@ -89,8 +99,6 @@ public class App extends Activity {
 
     @SuppressLint("StaticFieldLeak")
     private void startChat() {
-        setContentView(R.layout.chat);
-
         Chat.setDatabase(db);
 
         Chat.loadChat(
@@ -109,6 +117,13 @@ public class App extends Activity {
         );
 
         startService(new Intent(this, Messenger.class));
+
+        findViewById(R.id.show_password).setOnClickListener(v -> {
+            ViewFlipper flipper = findViewById(R.id.main_flipper);
+            flipper.setInAnimation(this, R.anim.prev_in);
+            flipper.setOutAnimation(this, R.anim.prev_out);
+            flipper.showPrevious();
+        });
 
         findViewById(R.id.send_message).setOnClickListener(v -> {
             EditText msgInput = findViewById(R.id.message_input);

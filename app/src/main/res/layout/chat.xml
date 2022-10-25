@@ -1,73 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="70dp"
+        android:background="@drawable/header"
+        android:id="@+id/chat_header"
+        android:orientation="horizontal"
+        android:paddingHorizontal="10dp">
+        <Button
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/show_passw_btn"
+            android:id="@+id/show_password"/>
+    </RelativeLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/chat_scroll"
+        android:layout_marginTop="70dp"
+        android:layout_marginBottom="70dp">
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="70dp"
-            android:background="@drawable/header"
-            android:id="@+id/chat_header"
-            android:orientation="horizontal">
+            android:layout_height="match_parent"
+            android:id="@+id/chat_layout"
+            android:orientation="vertical" />
+    </ScrollView>
 
-        </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:layout_alignParentBottom="true"
+        android:gravity="center"
+        android:paddingHorizontal="15dp">
+        <EditText
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="25dp"
+            android:background="#00000000"
+            android:hint="@string/message_input_hint"
+            android:paddingHorizontal="10dp"
+            android:id="@+id/message_input"/>
+        <Button
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="@drawable/send_message_button"
+            android:id="@+id/send_message"/>
+    </LinearLayout>
 
-        <ScrollView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/chat_scroll"
-            android:layout_marginTop="70dp"
-            android:layout_marginBottom="70dp">
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:id="@+id/chat_layout"
-                android:orientation="vertical" />
-        </ScrollView>
+    <LinearLayout
+        android:id="@+id/chat_inner_notif_layout"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_centerHorizontal="true"
+        android:gravity="center_vertical"
+        android:translationY="-40dp">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="70dp"
-            android:layout_alignParentBottom="true"
-            android:gravity="center"
-            android:paddingHorizontal="15dp">
-            <EditText
-                android:layout_width="0dp"
-                android:layout_height="50dp"
-                android:layout_weight="1"
-                android:layout_marginEnd="25dp"
-                android:background="#00000000"
-                android:hint="@string/message_input_hint"
-                android:paddingHorizontal="10dp"
-                android:id="@+id/message_input"/>
-            <Button
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:background="@drawable/send_message_button"
-                android:id="@+id/send_message"/>
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/chat_inner_notif_layout"
+        <ImageView
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:layout_centerHorizontal="true"
-            android:gravity="center_vertical"
-            android:translationY="-40dp">
+            android:src="@drawable/net_icon" />
 
-            <ImageView
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:src="@drawable/net_icon" />
-
-            <TextView
-                android:id="@+id/chat_inner_notif_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="3dp"
-                android:lines="1" />
-        </LinearLayout>
-    </RelativeLayout>
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <TextView
+            android:id="@+id/chat_inner_notif_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="3dp"
+            android:lines="1" />
+    </LinearLayout>
+</RelativeLayout>
