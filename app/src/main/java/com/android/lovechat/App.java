@@ -116,7 +116,16 @@ public class App extends Activity {
                 findViewById(R.id.chat_inner_notif_text)
         );
 
+        Menu.setMenuLayout(findViewById(R.id.menu_layout));
+        Menu.setContext(this);
+        Menu.setRootLayout(findViewById(R.id.chat_root));
+        Menu.setDarkeningLayout(findViewById(R.id.darkening));
+
+        Menu.initMoveMenuListener();
+
         startService(new Intent(this, Messenger.class));
+
+        findViewById(R.id.show_menu).setOnClickListener(v -> Menu.showMenu());
 
         findViewById(R.id.show_password).setOnClickListener(v -> {
             ViewFlipper flipper = findViewById(R.id.main_flipper);
