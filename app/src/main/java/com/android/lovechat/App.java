@@ -120,6 +120,7 @@ public class App extends Activity {
         Menu.setContext(this);
         Menu.setRootLayout(findViewById(R.id.chat_root));
         Menu.setDarkeningLayout(findViewById(R.id.darkening));
+        Menu.setChatScrollView(findViewById(R.id.chat_scroll));
 
         Menu.initMoveMenuListener();
 

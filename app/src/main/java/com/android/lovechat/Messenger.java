@@ -9,6 +9,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
@@ -17,12 +18,9 @@ import org.json.JSONObject;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.EOFException;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.Socket;
-import java.net.SocketException;
-import java.net.SocketTimeoutException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -98,6 +96,8 @@ public class Messenger extends Service {
 
         @Override
         protected Void doInBackground(Void... voids) {
+            Crypt.createCipher();
+
             while (!stopNetwork) {
                 try {
                     socket = null;
@@ -108,13 +108,14 @@ public class Messenger extends Service {
 
                 createIOStreams();
 
-                Map<String, String> onlineRequestMap = new HashMap<>();
-                onlineRequestMap.put("type", "sys");
-                onlineRequestMap.put("text", "online");
-                onlineRequestMap.put("id", UserData.userId);
+                KeyMessage keyMsg = new KeyMessage();
+                keyMsg.setRequest("key");
+                keyMsg.setUserID(UserData.userId);
+                keyMsg.setKey(Crypt.generateKey());
 
                 try {
-                    output.writeUTF(new JSONObject(onlineRequestMap).toString());
+                    output.writeUTF(keyMsg.toString());
+                    output.flush();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -124,11 +125,11 @@ public class Messenger extends Service {
                     while (!exception) {
                         if (!Objects.equals(messageText, "")) {
                             try {
-                                Map<String, String> map = new HashMap<>();
-                                map.put("type", "msg");
-                                map.put("id", UserData.interlocutorId);
-                                map.put("text", Crypt.encryptString(messageText));
-                                output.writeUTF(createJsonString(map));
+                                TextMessage msg = new TextMessage();
+                                msg.setRequest("msg");
+                                msg.setUserID(UserData.interlocutorId);
+                                msg.setText(messageText);
+                                output.writeUTF(Crypt.encryptString(msg.toString()));
                                 output.flush();
                             } catch (IOException e) {
                                 e.printStackTrace();
@@ -143,16 +144,13 @@ public class Messenger extends Service {
                 boolean exception = false;
                 while (!exception) {
                     try {
-                        String message = input.readUTF();
-                        JSONObject json = new JSONObject(message);
-                        if (json.getString("type").equals("msg")) {
-                            publishProgress("msg", Crypt.decryptString(json.getString("text")));
+                        TextMessage msg = new TextMessage(Crypt.decryptString(input.readUTF()));
+                        if (msg.getRequest().equals("msg")) {
+                            publishProgress("msg", msg.getText());
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
                         exception = true;
-                    } catch (JSONException e) {
-                        e.printStackTrace();
                     }
                 }
             }

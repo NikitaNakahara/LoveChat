@@ -48,7 +48,13 @@
                 android:layout_gravity="center"
                 android:layout_marginBottom="100dp"/>
 
-            <include layout="@layout/create_users_chain"
+            <include layout="@layout/create_user_profile"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginBottom="100dp"/>
+
+            <include layout="@layout/sync_data"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"

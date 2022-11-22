@@ -13,4 +13,9 @@
         <item name="android:colorPrimaryDark" tools:targetApi="l">@color/window_bg</item>
         <item name="android:windowLightStatusBar">true</item>
     </style>
+
+    <!-- Round ImageView -->
+    <style name="RoundedImageView">
+        <item name="cornerSize">50%</item>
+    </style>
 </resources>

@@ -3,29 +3,29 @@ package com.android.lovechat;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
+import android.widget.ImageView;
 import android.widget.ViewFlipper;
 
 import androidx.annotation.Nullable;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.android.material.imageview.ShapeableImageView;
+import com.squareup.picasso.Picasso;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.net.ConnectException;
 import java.net.Socket;
-import java.util.HashMap;
-import java.util.Map;
-
 public class SignIn extends Activity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -34,6 +34,49 @@ public class SignIn extends Activity {
         newPassword();
 
         super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == 1) {
+            Bitmap image = null;
+            ShapeableImageView imageView = findViewById(R.id.new_avatar);
+
+            if (resultCode == RESULT_OK) {
+                Uri selectedImage = data.getData();
+                Picasso.with(this).load(selectedImage).noFade().into(imageView);
+                try {
+                    image = MediaStore.Images.Media.getBitmap(this.getContentResolver(), selectedImage);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                writeBitmapToFile(image, getFilesDir() + "/user_avatar.jpg");
+
+            }
+        }
+    }
+
+    private void writeBitmapToFile(Bitmap bitmap, String path) {
+        try {
+            File imageFile = new File(path);
+            if (!imageFile.exists()) {
+                imageFile.createNewFile();
+            }
+
+            FileOutputStream output = new FileOutputStream(imageFile);
+
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, output);
+            bitmap.recycle();
+
+            output.flush();
+
+            output.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void newPassword() {
@@ -92,6 +135,8 @@ public class SignIn extends Activity {
         new AsyncTask<Void, String, Void>() {
             @Override
             protected Void doInBackground(Void... voids) {
+                Crypt.createCipher();
+
                 Socket socket = null;
                 do {
                     try {
@@ -111,20 +156,32 @@ public class SignIn extends Activity {
                     e.printStackTrace();
                 }
 
-                Map<String, String> map = new HashMap<>();
-                map.put("type", "sys");
-                map.put("text", "get_id");
+                KeyMessage keyMsg = new KeyMessage();
+                keyMsg.setRequest("key");
+                keyMsg.setUserID("0");
+                keyMsg.setKey(Crypt.generateKey());
                 try {
                     assert output != null;
-                    output.writeUTF(new JSONObject(map).toString());
+                    output.writeUTF(keyMsg.toString());
+                    output.flush();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                Message msg = new Message();
+                msg.setRequest("get_id");
+                msg.setUserID("0");
+                try {
+                    assert output != null;
+                    output.writeUTF(Crypt.encryptString(msg.toString()));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
 
                 try {
                     assert input != null;
-                    UserData.userId = new JSONObject(input.readUTF()).getString("id");
-                } catch (JSONException | IOException e) {
+                    UserData.userId = new Message(Crypt.decryptString(input.readUTF())).getUserID();
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
 
@@ -133,32 +190,49 @@ public class SignIn extends Activity {
 
             @Override
             protected void onPostExecute(Void unused) {
-                createUsersChain();
+                inputUserData();
             }
         }.execute();
     }
 
-    private void createUsersChain() {
+    private void inputUserData() {
         ViewFlipper flipper = findViewById(R.id.sign_in_flipper);
         flipper.showNext();
 
-        TextView idView = findViewById(R.id.user_id);
-        idView.setText(UserData.userId);
+        findViewById(R.id.confirm_new_user).setOnClickListener(v -> {
+            EditText nameEdit = findViewById(R.id.new_user_name);
+            EditText surnameEdit = findViewById(R.id.new_user_surname);
 
-        findViewById(R.id.chain_confirm_button).setOnClickListener(v -> {
-            EditText edit = findViewById(R.id.id_input);
-            String interlocutorId = edit.getText().toString();
-            if (interlocutorId != null && !interlocutorId.equals("")) {
-                UserData.interlocutorId = interlocutorId;
-                try {
-                    writeConfigFile();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+            String name = nameEdit.getText().toString();
+            String surname = surnameEdit.getText().toString();
+            if (!name.equals("")) {
+                UserData.userName = name;
             } else {
-                edit.setBackgroundResource(R.drawable.alarm_header);
+                nameEdit.setBackgroundResource(R.drawable.alarm_header);
             }
+
+            if (!surname.equals("")) {
+                UserData.userSurname = surname;
+            } else {
+                surnameEdit.setBackgroundResource(R.drawable.alarm_header);
+            }
+
+            syncUsersData();
         });
+
+        findViewById(R.id.new_avatar).setOnClickListener(v -> {
+            Intent intent = new Intent(Intent.ACTION_PICK);
+            intent.setType("image/*");
+            startActivityForResult(intent, 1);
+        });
+    }
+
+    private void syncUsersData() {
+        ViewFlipper flipper = findViewById(R.id.sign_in_flipper);
+        flipper.showNext();
+
+        ImageView qrView = findViewById(R.id.qr_image);
+        qrView.setImageBitmap(MyQRCode.generate(this, UserData.userId));
     }
 
     private void writeConfigFile() throws IOException {
