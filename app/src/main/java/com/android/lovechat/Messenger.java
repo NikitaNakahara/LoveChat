@@ -89,7 +89,7 @@ public class Messenger extends Service {
         private DataInputStream input = null;
         private DataOutputStream output = null;
 
-        private final String HOST = "192.168.1.37";
+        private final String HOST = "192.168.1.33";
         private final int PORT = 8080;
 
         private boolean alarmIsShowed = false;

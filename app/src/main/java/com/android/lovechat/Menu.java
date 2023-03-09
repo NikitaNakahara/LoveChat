@@ -4,31 +4,32 @@ package com.android.lovechat;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.view.GestureDetector;
+import android.graphics.drawable.Animatable;
+import android.graphics.drawable.AnimatedVectorDrawable;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.LinearLayout;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 
 public class Menu {
     private static RelativeLayout menuLayout;
-    private static RelativeLayout rootLayout;
-    private static LinearLayout darkeningLayout;
+    private static View darkeningLayout;
     private static ScrollView chatScrollView;
-
+    private static ImageView menuBtn;
 
     private static Context context;
 
     private static boolean menuIsShowed = false;
+    private static boolean lastMenuIsShowed = false;
 
-    public static void setMenuLayout(RelativeLayout _layout) { menuLayout = _layout; }
+    public static void setMenuLayout(RelativeLayout layout) { menuLayout = layout; }
     public static void setContext(Context _context) { context = _context; }
-    public static void setRootLayout(RelativeLayout _layout) { rootLayout = _layout; }
-    public static void setDarkeningLayout(LinearLayout _layout) { darkeningLayout = _layout; }
-    public static void setChatScrollView(ScrollView _view) { chatScrollView = _view; }
+    public static void setDarkeningLayout(View layout) { darkeningLayout = layout; }
+    public static void setChatScrollView(ScrollView view) { chatScrollView = view; }
+    public static void setMenuBtn(ImageView btn) { menuBtn = btn; }
+
+    public static boolean isShowed() { return menuIsShowed; }
 
     public static void showMenu() {
         if (!menuIsShowed) {
@@ -43,56 +44,42 @@ public class Menu {
                 darkeningLayout.setAlpha((0.3f - -menuLayout.getX() / 1000.0f) * 1.5f);
             });
             anim.start();
+
+            menuBtn.setImageDrawable(context.getResources().getDrawable(R.drawable.burger_menu_anim));
+            if (menuBtn.getDrawable() instanceof Animatable) {
+                ((AnimatedVectorDrawable) menuBtn.getDrawable()).start();
+            }
         }
 
         menuIsShowed = true;
     }
 
-    @SuppressLint("ClickableViewAccessibility")
-    public static void initMoveMenuListener() {
-        rootLayout.setOnTouchListener(Menu::moveMenuListener);
-        chatScrollView.setOnTouchListener(Menu::moveMenuSwipeListener);
-    }
+    public static void hiddenMenu() {
+        if (menuIsShowed) {
+            ObjectAnimator anim = ObjectAnimator.ofFloat(
+                    menuLayout,
+                    "X",
+                    0, Chat.dpToPx(-301, context)
+            );
+            anim.setDuration(200);
+            anim.addUpdateListener(animation -> {
+                menuLayout.setX((float) animation.getAnimatedValue());
+                darkeningLayout.setAlpha((0.3f - -menuLayout.getX() / 1000.0f) * 1.5f);
+            });
+            anim.start();
 
-    private static boolean moveMenuListener(View v, MotionEvent event) {
-        switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN: {
-                x = event.getX();
-                break;
-            }
-
-            case MotionEvent.ACTION_MOVE: {
-                float menuX = menuLayout.getX();
-
-                float deltaX = event.getX() - x;
-                x = event.getX();
-
-                menuX += deltaX;
-                darkeningLayout.setAlpha((0.3f - -menuX / 1000.0f) * 1.5f);
-                menuLayout.setX(menuX);
-
-                if (menuX < (float) Chat.dpToPx(-301, context)) {
-                    menuLayout.setX(Chat.dpToPx(-301, context));
-                } else if (menuX > 0.0f) {
-                    menuLayout.setX(0.0f);
-                }
-            }
-
-            case MotionEvent.ACTION_UP: {
-                float menuX = menuLayout.getX();
-                if (menuX < Chat.dpToPx(-150, context)) {
-                    hiddenMenu(menuX);
-                } else if (menuX > Chat.dpToPx(-150, context)) {
-                    showMenu(menuX);
-                } else {
-                    menuIsShowed = menuX != Chat.dpToPx(-301, context);
-                }
-
-                break;
+            menuBtn.setImageDrawable(context.getResources().getDrawable(R.drawable.reversed_burger_menu_anim));
+            if (menuBtn.getDrawable() instanceof Animatable) {
+                ((AnimatedVectorDrawable) menuBtn.getDrawable()).start();
             }
         }
 
-        return false;
+        menuIsShowed = false;
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    public static void initMoveMenuListener() {
+        chatScrollView.setOnTouchListener(Menu::moveMenuSwipeListener);
     }
 
     private static float x = 0;
@@ -109,6 +96,8 @@ public class Menu {
                 startX = event.getX();
                 x = startX;
                 startY = event.getY();
+
+                lastMenuIsShowed = menuIsShowed;
                 break;
             }
 
@@ -156,6 +145,17 @@ public class Menu {
                     menuIsShowed = menuX != Chat.dpToPx(-301, context);
                 }
 
+                if (lastMenuIsShowed != menuIsShowed) {
+                    if (menuIsShowed) {
+                        menuBtn.setImageDrawable(context.getResources().getDrawable(R.drawable.burger_menu_anim));
+                    } else {
+                        menuBtn.setImageDrawable(context.getResources().getDrawable(R.drawable.reversed_burger_menu_anim));
+                    }
+                    if (menuBtn.getDrawable() instanceof Animatable) {
+                        ((AnimatedVectorDrawable) menuBtn.getDrawable()).start();
+                    }
+                }
+
                 moveMenu = false;
                 swipeDirIsVertical = false;
 
@@ -196,63 +196,5 @@ public class Menu {
         anim.start();
 
         menuIsShowed = false;
-    }
-
-
-    public static class Users {
-        private static LinearLayout userProfile;
-        private static LinearLayout interlocutorProfile;
-
-        public static int USER = 1;
-        public static int INTERLOCUTOR = 2;
-
-        public static void setProfile(LinearLayout _profile, int profileType) {
-            if (profileType == USER) userProfile = _profile;
-            else if (profileType == INTERLOCUTOR) interlocutorProfile = _profile;
-        }
-
-        public static void setAvatar(Bitmap avatar, int profile) {
-
-        }
-
-        public static void setName(String name, int profile) {
-
-        }
-
-        public static void initOnClickListeners() {
-            boolean[] profileIsShow = { false, false };
-
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-            );
-
-            LinearLayout.LayoutParams hiddenParams = new LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    0
-            );
-
-            userProfile.getChildAt(0).setOnClickListener(v -> {
-                LinearLayout profile = (LinearLayout) userProfile.getChildAt(1);
-                if (!profileIsShow[0]) {
-                    profile.setLayoutParams(params);
-                } else {
-                    profile.setLayoutParams(hiddenParams);
-                }
-
-                profileIsShow[0] = !profileIsShow[0];
-            });
-
-            interlocutorProfile.getChildAt(0).setOnClickListener(v -> {
-                LinearLayout profile = (LinearLayout) interlocutorProfile.getChildAt(1);
-                if (!profileIsShow[1]) {
-                    profile.setLayoutParams(params);
-                } else {
-                    profile.setLayoutParams(hiddenParams);
-                }
-
-                profileIsShow[1] = !profileIsShow[1];
-            });
-        }
     }
 }

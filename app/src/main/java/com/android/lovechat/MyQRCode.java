@@ -2,7 +2,13 @@ package com.android.lovechat;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Camera;
 import android.graphics.Color;
+import android.hardware.camera2.CameraDevice;
+import android.hardware.camera2.CameraManager;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
+import android.widget.FrameLayout;
 
 import androidx.core.content.ContextCompat;
 
@@ -10,6 +16,8 @@ import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
+
+import me.dm7.barcodescanner.core.CameraPreview;
 
 public class MyQRCode {
     public static Bitmap generate(Context context, String content) {
@@ -35,5 +43,9 @@ public class MyQRCode {
         }
 
         return null;
+    }
+
+    public static String scan(Context context, SurfaceView cameraView) {
+        return "";
     }
 }

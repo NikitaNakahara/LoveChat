@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
@@ -30,6 +31,8 @@ public class App extends Activity {
         db.createWritableDb();
 
         setContentView(R.layout.main);
+
+        ((TextView) findViewById(R.id.menu_user_name)).setText(UserData.userName + " " + UserData.userSurname);
 
         checkPassword();
 
@@ -79,6 +82,7 @@ public class App extends Activity {
                             flipper.setInAnimation(this, R.anim.next_in);
                             flipper.setOutAnimation(this, R.anim.next_out);
                             flipper.showNext();
+
                             startChat();
 
                             passwordCharIndex[0] = 0;
@@ -118,15 +122,22 @@ public class App extends Activity {
 
         Menu.setMenuLayout(findViewById(R.id.menu_layout));
         Menu.setContext(this);
-        Menu.setRootLayout(findViewById(R.id.chat_root));
         Menu.setDarkeningLayout(findViewById(R.id.darkening));
         Menu.setChatScrollView(findViewById(R.id.chat_scroll));
+        Menu.setMenuBtn(findViewById(R.id.show_hidden_menu_btn));
 
         Menu.initMoveMenuListener();
 
         startService(new Intent(this, Messenger.class));
 
-        findViewById(R.id.show_menu).setOnClickListener(v -> Menu.showMenu());
+        findViewById(R.id.show_hidden_menu_btn).setOnClickListener(v -> {
+            boolean menuIsShowed = Menu.isShowed();
+            if (!menuIsShowed) {
+                Menu.showMenu();
+            } else {
+                Menu.hiddenMenu();
+            }
+        });
 
         findViewById(R.id.show_password).setOnClickListener(v -> {
             ViewFlipper flipper = findViewById(R.id.main_flipper);

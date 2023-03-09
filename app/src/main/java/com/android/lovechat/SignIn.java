@@ -12,6 +12,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ViewFlipper;
 
 import androidx.annotation.Nullable;
@@ -27,6 +29,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.Socket;
 public class SignIn extends Activity {
+    private int GET_AVATAR_FROM_GALLERY = 0;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         setTheme(R.style.Theme_LoveChat);
@@ -40,7 +44,7 @@ public class SignIn extends Activity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == 1) {
+        if (requestCode == GET_AVATAR_FROM_GALLERY) {
             Bitmap image = null;
             ShapeableImageView imageView = findViewById(R.id.new_avatar);
 
@@ -54,7 +58,6 @@ public class SignIn extends Activity {
                 }
 
                 writeBitmapToFile(image, getFilesDir() + "/user_avatar.jpg");
-
             }
         }
     }
@@ -137,53 +140,60 @@ public class SignIn extends Activity {
             protected Void doInBackground(Void... voids) {
                 Crypt.createCipher();
 
-                Socket socket = null;
+                Socket socket;
                 do {
                     try {
-                        socket = new Socket("192.168.1.37", 8080);
+                        socket = new Socket("192.168.1.33", 8080);
                     } catch (IOException e) {
                         e.printStackTrace();
+                        socket = null;
+                        continue;
+                    }
+
+
+                    DataInputStream input = null;
+                    DataOutputStream output = null;
+
+                    try {
+                        output = new DataOutputStream(socket.getOutputStream());
+                        input = new DataInputStream(socket.getInputStream());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        socket = null;
+                        continue;
+                    }
+
+                    KeyMessage keyMsg = new KeyMessage();
+                    keyMsg.setRequest("key");
+                    keyMsg.setUserID("0");
+                    keyMsg.setKey(Crypt.generateKey());
+                    try {
+                        output.writeUTF(keyMsg.toString());
+                        output.flush();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        socket = null;
+                        continue;
+                    }
+
+                    Message msg = new Message();
+                    msg.setRequest("get_id");
+                    msg.setUserID("0");
+                    try {
+                        output.writeUTF(Crypt.encryptString(msg.toString()));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        socket = null;
+                        continue;
+                    }
+
+                    try {
+                        UserData.userId = new Message(Crypt.decryptString(input.readUTF())).getUserID();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        socket = null;
                     }
                 } while (socket == null);
-
-                DataInputStream input = null;
-                DataOutputStream output = null;
-
-                try {
-                    output = new DataOutputStream(socket.getOutputStream());
-                    input = new DataInputStream(socket.getInputStream());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                KeyMessage keyMsg = new KeyMessage();
-                keyMsg.setRequest("key");
-                keyMsg.setUserID("0");
-                keyMsg.setKey(Crypt.generateKey());
-                try {
-                    assert output != null;
-                    output.writeUTF(keyMsg.toString());
-                    output.flush();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                Message msg = new Message();
-                msg.setRequest("get_id");
-                msg.setUserID("0");
-                try {
-                    assert output != null;
-                    output.writeUTF(Crypt.encryptString(msg.toString()));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                try {
-                    assert input != null;
-                    UserData.userId = new Message(Crypt.decryptString(input.readUTF())).getUserID();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
 
                 return null;
             }
@@ -223,7 +233,7 @@ public class SignIn extends Activity {
         findViewById(R.id.new_avatar).setOnClickListener(v -> {
             Intent intent = new Intent(Intent.ACTION_PICK);
             intent.setType("image/*");
-            startActivityForResult(intent, 1);
+            startActivityForResult(intent, GET_AVATAR_FROM_GALLERY);
         });
     }
 
@@ -231,8 +241,37 @@ public class SignIn extends Activity {
         ViewFlipper flipper = findViewById(R.id.sign_in_flipper);
         flipper.showNext();
 
+        ((TextView) findViewById(R.id.user_id)).setText(UserData.userId);
+
         ImageView qrView = findViewById(R.id.qr_image);
         qrView.setImageBitmap(MyQRCode.generate(this, UserData.userId));
+
+        findViewById(R.id.show_input_id).setOnClickListener(v -> {
+            ViewFlipper syncDataFlipper = findViewById(R.id.sync_data_flipper);
+            syncDataFlipper.setDisplayedChild(1);
+        });
+
+        findViewById(R.id.id_input_confirm_btn).setOnClickListener(v -> {
+            UserData.interlocutorId = ((EditText) findViewById(R.id.interlocutor_id_input)).getText().toString();
+            try {
+                writeConfigFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+
+        findViewById(R.id.show_qr).setOnClickListener(v -> {
+            ViewFlipper syncDataFlipper = findViewById(R.id.sync_data_flipper);
+            syncDataFlipper.setDisplayedChild(0);
+        });
+
+        findViewById(R.id.input_id_scan_qr).setOnClickListener(v -> scanQr());
+
+        findViewById(R.id.scan_qr).setOnClickListener(v -> scanQr());
+    }
+
+    private void scanQr() {
+
     }
 
     private void writeConfigFile() throws IOException {
@@ -248,6 +287,8 @@ public class SignIn extends Activity {
         writer.write("{\n" +
                 "\t\"password\":\"" + UserData.password + "\",\n" +
                 "\t\"id\":\"" + UserData.userId + "\",\n" +
+                "\t\"userName\":\"" + UserData.userName + "\",\n" +
+                "\t\"userSurname\":\"" + UserData.userSurname + "\",\n" +
                 "\t\"interlocutorId\":\"" + UserData.interlocutorId + "\"\n" +
                 "}");
 
