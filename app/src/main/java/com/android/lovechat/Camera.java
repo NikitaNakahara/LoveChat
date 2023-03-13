@@ -6,12 +6,14 @@ import android.content.pm.PackageManager;
 import android.graphics.SurfaceTexture;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
+import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CaptureRequest;
+import android.util.Log;
+import android.util.Size;
 import android.view.Surface;
 import android.view.TextureView;
-import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
@@ -22,8 +24,9 @@ public class Camera {
     private TextureView mViewport = null;
     private CameraDevice mCamera = null;
     private CameraCaptureSession mSession;
+    private Size cameraSize = null;
 
-    public void setViewport(TextureView viewport) { mViewport = viewport; }
+    public void setPreviewViewport(TextureView viewport) { mViewport = viewport; }
 
     public void start(Context context) {
         CameraDevice.StateCallback callback = new CameraDevice.StateCallback() {
@@ -32,6 +35,8 @@ public class Camera {
                 mCamera = camera;
 
                 SurfaceTexture vpSurfaceTexture = mViewport.getSurfaceTexture();
+
+                vpSurfaceTexture.setDefaultBufferSize(cameraSize.getWidth(), cameraSize.getHeight());
                 Surface vpSurface = new Surface(vpSurfaceTexture);
 
                 try {
@@ -58,18 +63,26 @@ public class Camera {
             }
 
             @Override
-            public void onDisconnected(@NonNull CameraDevice camera) {}
+            public void onDisconnected(@NonNull CameraDevice camera) {
+                mCamera.close();
+            }
 
             @Override
             public void onError(@NonNull CameraDevice camera, int error) {}
         };
 
-        CameraManager manager = (CameraManager) context.getSystemService(Context.CAMERA_SERVICE);
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
 
+        CameraManager manager = (CameraManager) context.getSystemService(Context.CAMERA_SERVICE);
+
         try {
+            cameraSize = new Size(0, 0);
+            CameraCharacteristics character = manager.getCameraCharacteristics(manager.getCameraIdList()[0]);
+            cameraSize = character.get(CameraCharacteristics.SENSOR_INFO_PIXEL_ARRAY_SIZE);
+            Log.i("", "camera size: " + cameraSize);
+
             manager.openCamera(manager.getCameraIdList()[0], callback, null);
         } catch (CameraAccessException e) {
             e.printStackTrace();

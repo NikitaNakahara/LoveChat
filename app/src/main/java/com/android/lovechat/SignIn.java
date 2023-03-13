@@ -291,7 +291,7 @@ public class SignIn extends Activity {
             syncUsersData();
         });
 
-        camera.setViewport(findViewById(R.id.scan_qr_camera_view));
+        camera.setPreviewViewport(findViewById(R.id.scan_qr_camera_view));
         camera.start(this);
     }
 
