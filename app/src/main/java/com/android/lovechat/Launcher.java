@@ -1,11 +1,15 @@
 package com.android.lovechat;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -21,8 +25,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Launcher extends Activity {
+    private final int PERMISSIONS_REQUEST_CAMERA = 1;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, PERMISSIONS_REQUEST_CAMERA);
+        } else {
+            SignIn.canUseCamera = true;
+        }
+
         String config = "";
         try {
             config = readConfigFile();
@@ -40,6 +52,13 @@ public class Launcher extends Activity {
         finish();
 
         super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if (requestCode == PERMISSIONS_REQUEST_CAMERA) {
+            SignIn.canUseCamera = grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED;
+        }
     }
 
     String readConfigFile() throws IOException {

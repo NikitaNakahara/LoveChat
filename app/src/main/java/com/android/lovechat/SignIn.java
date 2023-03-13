@@ -13,7 +13,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.ViewFlipper;
 
 import androidx.annotation.Nullable;
@@ -28,8 +27,11 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.Socket;
+
 public class SignIn extends Activity {
     private int GET_AVATAR_FROM_GALLERY = 0;
+
+    public static boolean canUseCamera = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -85,7 +87,7 @@ public class SignIn extends Activity {
     private void newPassword() {
         setContentView(R.layout.sign_in);
 
-        Button[] buttons = new Button[] {
+        Button[] buttons = new Button[]{
                 findViewById(R.id.npwd_btn_0),
                 findViewById(R.id.npwd_btn_1),
                 findViewById(R.id.npwd_btn_2),
@@ -99,7 +101,7 @@ public class SignIn extends Activity {
                 findViewById(R.id.npwd_btn_del)
         };
 
-        View[] points = new View[] {
+        View[] points = new View[]{
                 findViewById(R.id.npwd_point_1),
                 findViewById(R.id.npwd_point_2),
                 findViewById(R.id.npwd_point_3),
@@ -241,6 +243,11 @@ public class SignIn extends Activity {
         ViewFlipper flipper = findViewById(R.id.sign_in_flipper);
         flipper.showNext();
 
+        if (!canUseCamera) {
+            findViewById(R.id.scan_qr).setBackgroundResource(R.drawable.unactive_scan_qr_button);
+            findViewById(R.id.input_id_scan_qr).setBackgroundResource(R.drawable.unactive_scan_qr_button);
+        }
+
         ((TextView) findViewById(R.id.user_id)).setText(UserData.userId);
 
         ImageView qrView = findViewById(R.id.qr_image);
@@ -265,13 +272,27 @@ public class SignIn extends Activity {
             syncDataFlipper.setDisplayedChild(0);
         });
 
-        findViewById(R.id.input_id_scan_qr).setOnClickListener(v -> scanQr());
-
-        findViewById(R.id.scan_qr).setOnClickListener(v -> scanQr());
+        if (canUseCamera) {
+            findViewById(R.id.input_id_scan_qr).setOnClickListener(v -> scanQr());
+            findViewById(R.id.scan_qr).setOnClickListener(v -> scanQr());
+        }
     }
 
     private void scanQr() {
+        setContentView(R.layout.scan_qr);
 
+        Camera camera = new Camera();
+
+        findViewById(R.id.scan_qr_back).setOnClickListener(v -> {
+            camera.release();
+
+            setContentView(R.layout.sign_in);
+            ((ViewFlipper) findViewById(R.id.sign_in_flipper)).setDisplayedChild(2);
+            syncUsersData();
+        });
+
+        camera.setViewport(findViewById(R.id.scan_qr_camera_view));
+        camera.start(this);
     }
 
     private void writeConfigFile() throws IOException {
